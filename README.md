@@ -14,6 +14,10 @@ pnpm dev
 bun dev
 ```
 
+Se usó useState + useCallback nativo de React. La app es de una sola página sin estado compartido entre rutas, lo que hace innecesario Zustand o un context global.
+Toggle (optimistic update): Se eligió optimistic update para el toggle de completado porque la UX es más fluida y la API de DummyJSON es confiable. En caso de error, el estado se revierte automáticamente.
+Separación de responsabilidades: lib/api.ts solo contiene fetch puro → hooks/useTodos.ts maneja estado y llama a la lib → los componentes solo renderizan y disparan eventos.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

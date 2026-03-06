@@ -1,17 +1,17 @@
 # TaskFlow
 
-Aplicación de gestión de tareas construida con Next.js, React, TypeScript y TailwindCSS. Consume la API pública de [DummyJSON](https://dummyjson.com/docs/todos) con CRUD completo.
+Aplicación de gestión de tareas construida con Next.js, React, TypeScript y TailwindCSS. Consume la API pública de DummyJSON con CRUD completo y manejo de estado local.
 
 ---
 
-## 🚀 Instalación y ejecución
+## Instalación y ejecución
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+Abre http://localhost:3000 en tu navegador.
 
 ### Variables de entorno
 
@@ -21,86 +21,107 @@ Crea un archivo `.env.local` en la raíz del proyecto con el siguiente contenido
 NEXT_PUBLIC_API_BASE_URL=https://dummyjson.com
 ```
 
-> ⚠️ El servidor de desarrollo debe reiniciarse después de crear o modificar `.env.local`.
+El servidor de desarrollo debe reiniciarse después de crear o modificar `.env.local`.
 
 ---
 
-## 🛠️ Stack
+## Stack
 
-| Tecnología | Versión | Uso |
-|---|---|---|
-| Next.js | 15 | Framework principal, App Router |
-| React | 19 | UI |
-| TypeScript | 5 | Tipado estático |
-| TailwindCSS | 4 | Estilos |
-| Jest + RTL | — | Testing |
+| Tecnologia       | Version | Uso                              |
+|------------------|---------|----------------------------------|
+| Next.js          | 15      | Framework principal, App Router  |
+| React            | 19      | UI                               |
+| TypeScript       | 5       | Tipado estatico                  |
+| TailwindCSS      | 4       | Estilos                          |
+| shadcn/ui        | latest  | Componente Badge para contador   |
+| Jest + RTL       | latest  | Testing                          |
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 pt-taskflow-joshua/
 ├── app/
-│   ├── layout.tsx          # Layout raíz: fuentes, metadata
-│   ├── page.tsx            # Única ruta "/" — SPA
-│   └── globals.css         # Estilos globales + Tailwind
+│   ├── layout.tsx              Layout raiz: fuentes, metadata
+│   ├── page.tsx                Unica ruta "/" — SPA
+│   └── globals.css             Estilos globales + Tailwind
 ├── components/
 │   ├── ui/
-│   │   ├── TodoItem.tsx        # Item individual de tarea
-│   │   ├── EmptyState.tsx      # Estado vacío reutilizable
-│   │   ├── LoadingSkeleton.tsx # Skeleton de carga
-│   │   ├── ErrorState.tsx      # Error con botón de retry
-│   │   ├── FilterBar.tsx       # Filtros: todas/completadas/pendientes
-│   │   ├── Pagination.tsx      # Controles de paginación
-│   │   └── AddTodoForm.tsx     # Formulario para crear tarea
-│   └── TodoList.tsx            # Orquestador: conecta hook con UI
+│   │   ├── TodoItem.tsx        Item individual de tarea
+│   │   ├── EmptyState.tsx      Estado vacio reutilizable
+│   │   ├── LoadingSkeleton.tsx Skeleton de carga animado
+│   │   ├── ErrorState.tsx      Error con boton de retry
+│   │   ├── FilterBar.tsx       Filtros: todas/completadas/pendientes
+│   │   ├── Pagination.tsx      Controles de paginacion
+│   │   ├── AddTodoForm.tsx     Formulario para crear tarea
+│   │   └── TaskCounter.tsx     Contador con badges de shadcn/ui
+│   └── TodoList.tsx            Orquestador: conecta hook con UI
 ├── hooks/
-│   └── useTodos.ts         # Todo el estado y lógica de fetching
+│   └── useTodos.ts             Todo el estado y logica de fetching
 ├── lib/
-│   └── api.ts              # Funciones fetch puras (sin estado)
+│   └── api.ts                  Funciones fetch puras sin estado
 ├── types/
-│   └── todo.ts             # Tipos TypeScript de la API
+│   └── todo.ts                 Tipos TypeScript de la API
 ├── __tests__/
-│   ├── components/         # Tests de componentes
-│   └── hooks/              # Tests del hook principal
+│   ├── components/
+│   │   ├── EmptyState.test.tsx
+│   │   ├── FilterBar.test.tsx
+│   │   └── TodoItem.test.tsx
+│   └── hooks/
+│       └── useTodos.test.ts
 ├── .env.example
+├── jest.config.ts
+├── jest.setup.ts
 └── README.md
 ```
 
 ---
 
-## ✅ Funcionalidades
+## Funcionalidades
 
-- **Listado paginado** — 10 tareas por página con controles anterior/siguiente
-- **Loading state** — Skeleton animado mientras carga
-- **Error handling** — Mensaje claro con botón de reintentar
-- **Crear tarea** — Formulario con feedback de éxito/error
-- **Toggle completada/pendiente** — Con optimistic update
-- **Eliminar tarea** — Con confirmación previa (`window.confirm`)
-- **Filtro local** — Todas / Completadas / Pendientes sin llamadas extra a la API
-- **Contador** — Muestra tareas completadas vs total en tiempo real
+### Listado paginado
+Las tareas se cargan desde el endpoint GET /todos con paginacion de 10 por pagina. Se incluyen controles de pagina anterior y pagina siguiente con indicador de pagina actual sobre el total.
+
+### Loading state
+Mientras la API responde se muestra un skeleton animado que replica la estructura visual de los items de tarea, evitando saltos de layout al cargar.
+
+### Error handling con retry
+Si la API falla se muestra un mensaje de error descriptivo con un boton para reintentar la carga sin necesidad de recargar la pagina.
+
+### Crear tarea
+Formulario con input de texto que llama a POST /todos/add. Al recibir respuesta exitosa la tarea se agrega al inicio del listado local sin recargar la pagina. Se muestra feedback visual de exito o error.
+
+### Toggle completada / pendiente
+Permite cambiar el estado completed de cualquier tarea llamando a PATCH /todos/{id}. El cambio se refleja de forma inmediata usando optimistic update. Si la API falla el estado se revierte automaticamente.
+
+### Eliminar tarea
+Cada tarea tiene un boton de eliminar que solicita confirmacion antes de ejecutar la operacion. Al confirmar se llama a DELETE /todos/{id} y la tarea se remueve del estado local.
+
+### Filtro local
+Filtrado del listado actual sin llamadas adicionales a la API. Las opciones son: Todas, Completadas y Pendientes.
+
+### Contador de tareas
+Muestra en tiempo real el total de tareas, cuantas estan completadas y cuantas estan pendientes usando el componente Badge de shadcn/ui.
 
 ---
 
-## 🧠 Decisiones técnicas
+## Decisiones tecnicas
 
-### 1. Solución de estado: `useState` + `useCallback` (sin Zustand)
+### Solucion de estado: useState + useCallback sin Zustand
 
-**Decisión:** Se usó el estado nativo de React (`useState`, `useCallback`, `useEffect`) centralizado en un único custom hook `useTodos`.
+Se uso el estado nativo de React centralizado en un unico custom hook useTodos.
 
-**Justificación:** La aplicación es una SPA de una sola ruta sin estado compartido entre múltiples páginas o contextos. Zustand resuelve el problema de estado global entre rutas o componentes muy alejados en el árbol, lo cual no aplica aquí. Usarlo sería overengineering para este caso. `useState` + custom hook cumple exactamente lo que se necesita, es más legible y no agrega dependencias innecesarias.
+La aplicacion es una SPA de una sola ruta sin estado compartido entre multiples paginas o contextos. Zustand resuelve el problema de estado global entre rutas o componentes muy alejados en el arbol, lo cual no aplica en este caso. Usarlo seria overengineering. useState mas custom hook cumple exactamente lo que se necesita, es mas legible y no agrega dependencias innecesarias.
 
----
+### Estrategia de actualizacion: Optimistic Update en el toggle
 
-### 2. Estrategia de actualización: Optimistic Update en el toggle
+Al marcar una tarea como completada o pendiente, el cambio se refleja en la UI de forma inmediata antes de recibir la respuesta de la API. Si la API falla, el estado se revierte automaticamente al valor original.
 
-**Decisión:** Al marcar una tarea como completada/pendiente, el cambio se refleja en la UI **inmediatamente** antes de recibir la respuesta de la API. Si la API falla, el estado se revierte automáticamente.
-
-**Justificación:** DummyJSON es una API pública confiable y el endpoint PATCH tiene latencia baja. El optimistic update mejora notablemente la UX sin espera visible. El rollback automático en caso de error garantiza consistencia. Esta es la estrategia estándar en apps de productividad como Notion, Linear y Todoist.
+DummyJSON es una API publica confiable con latencia baja. El optimistic update mejora notablemente la UX sin espera visible. El rollback automatico en caso de error garantiza consistencia. Esta es la estrategia estandar en apps de productividad como Notion, Linear y Todoist.
 
 ```ts
-// Actualización optimista: cambia en UI antes de esperar la API
+// Actualizacion optimista: cambia en UI antes de esperar la API
 setTodos((prev) =>
   prev.map((t) => (t.id === id ? { ...t, completed: !currentCompleted } : t))
 );
@@ -114,27 +135,19 @@ try {
 }
 ```
 
----
+### Separacion de responsabilidades en capas
 
-### 3. Separación de responsabilidades en capas
+| Capa        | Archivo            | Responsabilidad                                                              |
+|-------------|--------------------|------------------------------------------------------------------------------|
+| API Layer   | lib/api.ts         | Solo fetch. Sin estado ni logica de negocio. Lanza errores si res.ok falla. |
+| State Layer | hooks/useTodos.ts  | Todo el estado y CRUD. Llama a lib/api.ts. Nunca toca el DOM.               |
+| UI Layer    | components/        | Solo renderiza y dispara eventos. No llama a fetch directamente.            |
 
-**Decisión:** La lógica está dividida en tres capas con responsabilidades claras:
+Esta separacion permite testear cada capa de forma independiente, facilita el mantenimiento y hace el codigo predecible. Si la API cambia, solo se modifica lib/api.ts.
 
-| Capa | Archivo | Responsabilidad |
-|---|---|---|
-| **API Layer** | `lib/api.ts` | Solo `fetch`. Sin estado, sin lógica de negocio. Lanza errores si `!res.ok`. |
-| **State Layer** | `hooks/useTodos.ts` | Todo el estado y CRUD. Llama a `lib/api.ts`. Nunca toca el DOM. |
-| **UI Layer** | `components/` | Solo renderiza y dispara eventos. No llama a `fetch` directamente. |
+### Manejo del limite de IDs de DummyJSON
 
-**Justificación:** Esta separación permite testear cada capa de forma independiente, facilita el mantenimiento y hace el código predecible. Si mañana se cambia la API, solo se modifica `lib/api.ts`.
-
----
-
-### 4. Manejo del límite de IDs de DummyJSON
-
-**Decisión:** DummyJSON solo acepta IDs del 1 al 150 para operaciones de escritura (PATCH/DELETE). Las tareas creadas localmente reciben IDs > 150 de la API. Se detecta este caso y se omite la llamada a la API para esas tareas, operando solo sobre el estado local.
-
-**Justificación:** Las operaciones POST en DummyJSON devuelven IDs incrementales que no existen realmente en el servidor. Llamar a `PATCH /todos/255` retorna 404. La solución correcta es detectar si el ID pertenece al rango real del servidor y actuar en consecuencia.
+DummyJSON solo acepta IDs del 1 al 150 para operaciones de escritura (PATCH y DELETE). Las tareas creadas localmente reciben IDs mayores a 150 porque son IDs simulados que no existen en el servidor. Se detecta este caso y se omite la llamada a la API para esas tareas, operando unicamente sobre el estado local.
 
 ```ts
 // Solo llamamos API si el ID existe en DummyJSON (rango 1-150)
@@ -144,88 +157,87 @@ if (id <= 150) {
 // Las tareas locales (id > 150) solo se actualizan en estado local
 ```
 
----
+### Variables de entorno con validacion explicita
 
-### 5. Variables de entorno con validación explícita
-
-**Decisión:** En lugar de usar `process.env.NEXT_PUBLIC_API_BASE_URL!` directamente, se creó una función `getBaseUrl()` que lanza un error descriptivo si la variable no está definida.
-
-**Justificación:** Facilita el debugging en entornos donde `.env.local` no se cargó correctamente. El error descriptivo es más útil que un `Cannot read properties of undefined` genérico.
+En lugar de usar process.env.NEXT_PUBLIC_API_BASE_URL con non-null assertion directamente, se creo una funcion getBaseUrl() que lanza un error descriptivo si la variable no esta definida. Esto facilita el debugging en entornos donde .env.local no se cargo correctamente.
 
 ```ts
 function getBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!url) throw new Error("NEXT_PUBLIC_API_BASE_URL no está definida");
+  if (!url) throw new Error("NEXT_PUBLIC_API_BASE_URL no esta definida");
   return url;
 }
 ```
 
----
+### Uso de shadcn/ui
 
-## 🐛 Proceso de debugging documentado
-
-### Problema 1: Variable de entorno `undefined` en Windows
-
-**Síntoma:** La URL de fetch aparecía como `/undefined/todos?limit=10&skip=0`.
-
-**Diagnóstico:** Se agregó `console.log("BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL)` en `lib/api.ts`. La consola mostró `BASE_URL: undefined`, confirmando que la variable no se leía.
-
-**Causa raíz:** En Windows, el Explorador de archivos oculta extensiones por defecto. El archivo creado era `.env.local.txt` en lugar de `.env.local`.
-
-**Solución:** Verificar con `Get-ChildItem -Force` en PowerShell y renombrar el archivo. Como solución de respaldo, se configuró la variable directamente en `next.config.ts` para no bloquear el desarrollo mientras se resolvía.
+Se integro el componente Badge de shadcn/ui para el contador de tareas. Se eligio esta libreria porque esta mencionada explicitamente en el stack sugerido del proyecto y tiene uso concreto y justificado, sin forzar su inclusion.
 
 ---
 
-### Problema 2: PATCH/DELETE fallaban en tareas creadas localmente
+## Proceso de debugging documentado
 
-**Síntoma:** Al crear una tarea y luego intentar editarla o eliminarla, la consola mostraba `404 Not Found` en `dummyjson.com/todos/255`.
+### Problema 1: Variable de entorno undefined en Windows
 
-**Diagnóstico:** DummyJSON retorna IDs > 150 para tareas creadas con POST (IDs simulados que no existen en el servidor real).
+Sintoma: La URL de fetch aparecia como /undefined/todos?limit=10&skip=0.
 
-**Solución:** Detectar el rango del ID y omitir la llamada a la API para tareas locales, operando solo sobre el estado en memoria.
+Diagnostico: Se agrego console.log("BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL) en lib/api.ts. La consola mostro BASE_URL: undefined, confirmando que la variable no se leia.
+
+Causa raiz: En Windows, el Explorador de archivos oculta extensiones por defecto. El archivo creado era .env.local.txt en lugar de .env.local.
+
+Solucion: Verificar con Get-ChildItem -Force en PowerShell y renombrar el archivo. Como solucion de respaldo, se configuro la variable directamente en next.config.ts para no bloquear el desarrollo mientras se resolvia.
+
+### Problema 2: PATCH y DELETE fallaban en tareas creadas localmente
+
+Sintoma: Al crear una tarea y luego intentar editarla o eliminarla, la consola mostraba 404 Not Found en dummyjson.com/todos/255.
+
+Diagnostico: DummyJSON retorna IDs mayores a 150 para tareas creadas con POST. Esos IDs no existen en el servidor para operaciones de escritura.
+
+Solucion: Detectar el rango del ID y omitir la llamada a la API para tareas locales, operando solo sobre el estado en memoria.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
-pnpm test            # Ejecutar todos los tests
-pnpm test:watch      # Modo watch para desarrollo
-pnpm test:coverage   # Reporte de cobertura
+pnpm test             # Ejecutar todos los tests
+pnpm test:watch       # Modo watch para desarrollo
+pnpm test:coverage    # Reporte de cobertura
 ```
 
-Los tests cubren los componentes reutilizables clave (`TodoItem`, `EmptyState`, `FilterBar`) y el comportamiento del hook `useTodos`, incluyendo casos de éxito, error y estados de carga.
+Se implementaron 27 tests con Jest y React Testing Library cubriendo los componentes reutilizables y el comportamiento completo del hook useTodos.
+
+| Archivo               | Tests | Que cubre                                              |
+|-----------------------|-------|--------------------------------------------------------|
+| EmptyState.test.tsx   | 3     | Props opcionales y render condicional                  |
+| FilterBar.test.tsx    | 5     | Interaccion de usuario y estilos activos               |
+| TodoItem.test.tsx     | 7     | Estados visuales, toggle, delete con confirmacion      |
+| useTodos.test.ts      | 12    | Loading, error, filtros, CRUD, optimistic update, rollback, paginacion |
 
 ---
 
-## 📦 Scripts disponibles
+## Scripts disponibles
 
 ```bash
-pnpm dev        # Servidor de desarrollo
-pnpm build      # Build de producción (sin errores de lint)
-pnpm start      # Servidor de producción
-pnpm lint       # ESLint
-pnpm test       # Jest + React Testing Library
+pnpm dev          # Servidor de desarrollo
+pnpm build        # Build de produccion sin errores de lint
+pnpm start        # Servidor de produccion
+pnpm lint         # ESLint
+pnpm test         # Jest + React Testing Library
+pnpm test:watch   # Tests en modo watch
+pnpm test:coverage # Reporte de cobertura de tests
 ```
 
 ---
 
-🧪 Testing
+## Proximas mejoras
 
-bashpnpm test            # Ejecutar todos los tests
-pnpm test:watch      # Modo watch para desarrollo
-pnpm test:coverage   # Reporte de cobertura
-Los tests cubren los componentes reutilizables clave (TodoItem, EmptyState, FilterBar) y el comportamiento del hook useTodos, incluyendo casos de éxito, error y estados de carga.
+Se esta trabajando en una barra de busqueda en tiempo real para filtrar tareas por texto. Esta funcionalidad operara de forma local sobre los datos ya cargados en el estado de la aplicacion, sin realizar llamadas adicionales a la API, siguiendo el mismo patron del filtro por estado ya implementado.
 
-📦 Scripts disponibles
-bashpnpm dev        # Servidor de desarrollo
-pnpm build      # Build de producción (sin errores de lint)
-pnpm start      # Servidor de producción
-pnpm lint       # ESLint
-pnpm test       # Jest + React Testing Library
+---
 
-## 🔗 Links
+## Links
 
-- **Repositorio:** [github.com/tu-usuario/pt-taskflow-joshua](https://github.com/tu-usuario/pt-taskflow-joshua)
-- **Deploy:** [pt-taskflow-joshua.vercel.app](https://pt-taskflow-joshua.vercel.app)
-- **API:** [dummyjson.com/docs/todos](https://dummyjson.com/docs/todos)
+- Repositorio: https://github.com/spartancreed22/pt-taskflow-joshua
+- Deploy: https://pt-taskflow-joshua.vercel.app
+- API: https://dummyjson.com/docs/todos

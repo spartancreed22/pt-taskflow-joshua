@@ -9,6 +9,7 @@ import { ErrorState } from "./ui/ErrorState";
 import { FilterBar } from "./ui/FilterBar";
 import { Pagination } from "./ui/Pagination";
 import { AddTodoForm } from "./ui/AddTodoForm";
+import { TaskCounter } from "./ui/TaskCounter";
 
 
 export function TodoList() {
@@ -48,6 +49,9 @@ export function TodoList() {
       {/* Agregar tarea */}
       <AddTodoForm onAdd={addTodo} />
 
+      {/* uso de libreria */}
+      <TaskCounter todos={todos} />  {/* ← línea nueva */}
+      
 
       {/* Filtros */}
       <FilterBar current={filter} onChange={setFilter} />

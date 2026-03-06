@@ -210,6 +210,20 @@ pnpm test       # Jest + React Testing Library
 
 ---
 
+🧪 Testing
+
+bashpnpm test            # Ejecutar todos los tests
+pnpm test:watch      # Modo watch para desarrollo
+pnpm test:coverage   # Reporte de cobertura
+Los tests cubren los componentes reutilizables clave (TodoItem, EmptyState, FilterBar) y el comportamiento del hook useTodos, incluyendo casos de éxito, error y estados de carga.
+
+📦 Scripts disponibles
+bashpnpm dev        # Servidor de desarrollo
+pnpm build      # Build de producción (sin errores de lint)
+pnpm start      # Servidor de producción
+pnpm lint       # ESLint
+pnpm test       # Jest + React Testing Library
+
 ## 🔗 Links
 
 - **Repositorio:** [github.com/tu-usuario/pt-taskflow-joshua](https://github.com/tu-usuario/pt-taskflow-joshua)

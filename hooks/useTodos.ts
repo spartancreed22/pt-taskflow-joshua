@@ -12,7 +12,9 @@ export function useTodos() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  
   const [filter, setFilter] = useState<FilterType>("all");
+  const [search, setSearch] = useState("");
 
   // ── Estados de UI ─────────────────────────────────────────────────
   const [isLoading, setIsLoading] = useState(false);
@@ -102,9 +104,18 @@ const removeTodo = useCallback(async (id: number) => {
 
   // ── Filtro local (sin API) ────────────────────────────────────────
   const filteredTodos = todos.filter((t) => {
-    if (filter === "completed") return t.completed;
-    if (filter === "pending") return !t.completed;
-    return true;
+    const matchesFilter =
+      filter === "completed"
+        ? t.completed
+        : filter === "pending"
+          ? !t.completed
+          : true;
+
+    const matchesSearch = t.todo
+      .toLowerCase()
+      .includes(search.toLowerCase().trim());
+
+    return matchesFilter && matchesSearch;
   });
 
   return {
@@ -116,6 +127,11 @@ const removeTodo = useCallback(async (id: number) => {
     isLoading,
     error,
     feedback,
+
+    // filtrado de busqueda
+    search,
+    setSearch,
+
     setPage,
     setFilter,
     loadTodos,

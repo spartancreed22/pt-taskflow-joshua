@@ -11,6 +11,10 @@ import { Pagination } from "./ui/Pagination";
 import { AddTodoForm } from "./ui/AddTodoForm";
 import { TaskCounter } from "./ui/TaskCounter";
 
+// Barra de busqueda
+import { SearchBar } from "./ui/SearchBar";
+
+
 
 export function TodoList() {
   const {
@@ -21,6 +25,10 @@ export function TodoList() {
     isLoading,
     error,
     feedback,
+    // filtrado de busqueda
+    search,
+    setSearch,
+
     setPage,
     setFilter,
     loadTodos,
@@ -49,6 +57,9 @@ export function TodoList() {
       {/* Agregar tarea */}
       <AddTodoForm onAdd={addTodo} />
 
+      {/* Barra de busqueda */}
+      <SearchBar value={search} onChange={setSearch} />
+
       {/* uso de libreria */}
       <TaskCounter todos={todos} />  {/* ← línea nueva */}
       
@@ -63,7 +74,13 @@ export function TodoList() {
       ) : error ? (
         <ErrorState message={error} onRetry={loadTodos} />
       ) : todos.length === 0 ? (
-        <EmptyState message="No hay tareas en esta categoría" />
+        <EmptyState
+          message={
+            search
+              ? `No se encontraron tareas para "${search}"`
+              : "No hay tareas en esta categoría"
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {todos.map((todo) => (
